@@ -9,7 +9,7 @@ To load the files into irb:
 load 'Allocator.rb'
 load 'Labels.rb'
 load 'Seats.rb'
-load 'ArrangeSeats.rb'
+load 'SeatAllocator.rb'
 ```
 
 Usage:
