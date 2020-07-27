@@ -2,14 +2,15 @@ class Allocator
     def initialize(seats, passengers)
         @seats = seats
         @passengers = passengers
+        @total = 0
     end
 
     def calculate_seat_count
-        window_seats = aisle_seats = total = 0
+        window_seats = aisle_seats = 0
         for row in @seats
             for seat in row
                 if seat != 0
-                    total += 1
+                    @total += 1
                 end
                 if seat == 'W' 
                     window_seats += 1
@@ -18,36 +19,45 @@ class Allocator
                 end
             end
         end
-        return [window_seats, aisle_seats, total]        
+        return [window_seats, aisle_seats]        
+    end
+
+    def isFlightOverload()
+        return @total < @passengers
+    end
+
+    def calculate_aisle_passengers(aisle_seats, remaining_passengers)
+        (remaining_passengers > 0 and aisle_seats <= remaining_passengers) ? aisle_seats : remaining_passengers
+    end
+
+    def calculate_window_passengers(window_seats, remaining_passengers)
+        if remaining_passengers > 0 and window_seats <= remaining_passengers
+            return window_seats
+        elsif remaining_passengers > 0 and window_seats > remaining_passengers
+            return remaining_passengers
+        else
+            return 0
+        end
+    end
+
+    def calculate_middle_passengers(remaining_passengers)
+        remaining_passengers > 0 ? remaining_passengers : 0
     end
 
     def allocate
-        window_seats, aisle_seats, total = calculate_seat_count 
-        if total < @passengers
-            raise 'Cannot find seats for all passengers'
-        end
-        remaining_passenger_count = @passengers       
-        if  remaining_passenger_count > 0 and aisle_seats <= remaining_passenger_count
-            aisle_passengers = aisle_seats
-        else
-            aisle_passengers = remaining_passenger_count
-        end
-        remaining_passenger_count -= aisle_passengers
-        
-        if remaining_passenger_count > 0 and window_seats <= remaining_passenger_count
-            window_passengers = window_seats
-        elsif remaining_passenger_count > 0 and window_seats > remaining_passenger_count
-            window_passengers = remaining_passenger_count
-        else
-            window_passengers = 0
-        end
-        remaining_passenger_count -= window_passengers
+        window_seats, aisle_seats = calculate_seat_count 
 
-        if remaining_passenger_count > 0
-            middle_passeengers = remaining_passenger_count
-        else
-            middle_passeengers = 0
+        if isFlightOverload() 
+             raise 'Cannot find seats for all passenger' 
         end
+        remaining_passengers = @passengers
+        aisle_passengers = calculate_aisle_passengers(aisle_seats, remaining_passengers)
+        remaining_passengers -= aisle_passengers
+        
+        window_passengers = calculate_window_passengers(window_seats, remaining_passengers)
+        remaining_passengers -= window_passengers
+
+        middle_passeengers = calculate_middle_passengers(remaining_passengers)
         
         window_filled = middle_filled = aisle_filled = rows = 0
         @seats.each do |row|

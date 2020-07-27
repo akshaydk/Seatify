@@ -4,7 +4,6 @@ class Seats
     end
 
     def check(array)
-        puts array.length
         if array.length != 2 then
             raise 'Improper input format'
         end
